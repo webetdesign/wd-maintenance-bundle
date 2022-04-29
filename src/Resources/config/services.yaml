@@ -8,7 +8,7 @@ services:
     exclude:
       - '../../DependencyInjection'
 
-  WebEtDesign\MaintenanceBundle\Services\MaintenanceService:
+  WebEtDesign\MaintenanceBundle\EventSubscriber\MaintenanceSubscriber:
     autowire: true
     arguments:
       - '%wd_maintenance.template%'

@@ -10,7 +10,7 @@ class MaintenanceService
 {
     private Filesystem $filesystem;
 
-    public const MAINTENANCE_FILE = __DIR__ . '../../../../../public/.maintenance';
+    public const MAINTENANCE_FILE = __DIR__ . '/../../../../../public';
 
     #[Pure] public function __construct()
     {
@@ -22,9 +22,9 @@ class MaintenanceService
     {
         $this->disableMaintenance(true, $io);
 
-        $this->filesystem->touch(self::MAINTENANCE_FILE);
+        $this->filesystem->touch($this->getMaintenancePath());
 
-        $this->filesystem->appendToFile(self::MAINTENANCE_FILE, $ipsArgs);
+        $this->filesystem->appendToFile($this->getMaintenancePath(), $ipsArgs);
 
         $io?->success('Maintenance mode enabled');
     }
@@ -32,9 +32,9 @@ class MaintenanceService
     public function disableMaintenance(bool $check = false, SymfonyStyle $io = null)
     {
         $this->filesystem = new Filesystem();
-
-        if ($this->filesystem->exists(self::MAINTENANCE_FILE)){
-            $this->filesystem->remove(self::MAINTENANCE_FILE);
+        
+        if ($this->filesystem->exists($this->getMaintenancePath())){
+            $this->filesystem->remove($this->getMaintenancePath());
             if (!$check) $io?->success('Maintenance mode disabled');
         }else{
             if (!$check) $io?->error('Maintenance mode is not enabled');
@@ -43,11 +43,15 @@ class MaintenanceService
 
     public function maintenanceIsEnable (): bool
     {
-        return $this->filesystem->exists(self::MAINTENANCE_FILE);
+        return $this->filesystem->exists($this->getMaintenancePath());
     }
 
     public function getIps (): array
     {
-        return $this->maintenanceIsEnable() ? explode(',', file_get_contents(self::MAINTENANCE_FILE)) : [];
+        return $this->maintenanceIsEnable() ? explode(',', file_get_contents($this->getMaintenancePath())) : [];
+    }
+    
+    private function getMaintenancePath (){
+        return realpath(self::MAINTENANCE_FILE) . '/.maintenance';
     }
 }
