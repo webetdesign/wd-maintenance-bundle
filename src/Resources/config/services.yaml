@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  WebEtDesign\MaintenanceBundle\:
+    resource: '../../*'
+    exclude:
+      - '../../DependencyInjection'
+
+  WebEtDesign\MaintenanceBundle\Services\MaintenanceService:
+    autowire: true
+    arguments:
+      - '%wd_maintenance.template%'
+
