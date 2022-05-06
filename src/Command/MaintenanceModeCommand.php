@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use WebEtDesign\CmsBundle\Repository\CmsSiteRepository;
 use WebEtDesign\MaintenanceBundle\Services\MaintenanceService;
 
 #[AsCommand(
@@ -18,7 +19,7 @@ use WebEtDesign\MaintenanceBundle\Services\MaintenanceService;
 class MaintenanceModeCommand extends Command
 {
 
-    public function __construct(private MaintenanceService $maintenanceService)
+    public function __construct(private MaintenanceService $maintenanceService, private CmsSiteRepository $cmsSiteRepository)
     {
         parent::__construct();
     }
@@ -43,9 +44,9 @@ class MaintenanceModeCommand extends Command
         }
 
         if ($input->getOption('on')){
-            $this->maintenanceService->enableMaintenance($ipsArgs, $io);
+            $this->maintenanceService->enableMaintenance($ipsArgs, $io, $this->cmsSiteRepository->findAll());
         }else if ($input->getOption('off')){
-            $this->maintenanceService->disableMaintenance(false, $io);
+            $this->maintenanceService->disableMaintenance(false, $io, $this->cmsSiteRepository->findAll());
         }else{
             $io->error('You need to pass on or off option');
             return Command::INVALID;

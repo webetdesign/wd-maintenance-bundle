@@ -18,6 +18,8 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event){
 
+        $this->maintenanceService->setHost($event->getRequest()->headers->get('host'));
+        
         if (!$this->maintenanceService->maintenanceIsEnable()) return;
 
         if (in_array($event->getRequest()->getClientIp(), $this->maintenanceService->getIps())) return;

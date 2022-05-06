@@ -5,6 +5,7 @@ namespace WebEtDesign\MaintenanceBundle\Services;
 use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
+use WebEtDesign\CmsBundle\Entity\CmsSite;
 
 class MaintenanceService
 {
@@ -12,33 +13,41 @@ class MaintenanceService
 
     public const MAINTENANCE_FILE = __DIR__ . '/../../../../../public';
 
-    #[Pure] public function __construct()
+    #[Pure] public function __construct(private ?string $host = null)
     {
         $this->filesystem = new Filesystem();
     }
 
-
-    public function enableMaintenance(?string $ipsArgs = '', SymfonyStyle $io = null)
+    public function enableMaintenance(?string $ipsArgs = '', SymfonyStyle $io = null, array $sites)
     {
-        $this->disableMaintenance(true, $io);
+        $this->disableMaintenance(true, $io, $sites);
 
-        $this->filesystem->touch($this->getMaintenancePath());
+        /** @var CmsSite $site */
+        foreach ($sites as $site) {
+            $this->setHost($site->getHost());
+            $this->filesystem->touch($this->getMaintenancePath(false));
 
-        $this->filesystem->appendToFile($this->getMaintenancePath(), $ipsArgs);
+            $this->filesystem->appendToFile($this->getMaintenancePath(), str_replace(' ', '', $ipsArgs));
+        }
 
         $io?->success('Maintenance mode enabled');
     }
 
-    public function disableMaintenance(bool $check = false, SymfonyStyle $io = null)
+    public function disableMaintenance(bool $check = false, SymfonyStyle $io = null, array $sites)
     {
         $this->filesystem = new Filesystem();
-        
-        if ($this->filesystem->exists($this->getMaintenancePath())){
-            $this->filesystem->remove($this->getMaintenancePath());
-            if (!$check) $io?->success('Maintenance mode disabled');
-        }else{
-            if (!$check) $io?->error('Maintenance mode is not enabled');
+
+        /** @var CmsSite $site */
+        foreach ($sites as $site) {
+            $this->setHost($site->getHost());
+            if ($this->filesystem->exists($this->getMaintenancePath())){
+                $this->filesystem->remove($this->getMaintenancePath());
+                if (!$check) $io?->success('Maintenance mode disabled');
+            }else{
+                if (!$check) $io?->error('Maintenance mode is not enabled');
+            }
         }
+       
     }
 
     public function maintenanceIsEnable (): bool
@@ -51,7 +60,29 @@ class MaintenanceService
         return $this->maintenanceIsEnable() ? explode(',', file_get_contents($this->getMaintenancePath())) : [];
     }
     
-    private function getMaintenancePath (){
-        return realpath(self::MAINTENANCE_FILE) . '/.maintenance';
+    private function getMaintenancePath (bool $test = true){
+        if ($test){
+            return realpath(self::MAINTENANCE_FILE . "/.maintenance-$this->host") ?: realpath(self::MAINTENANCE_FILE . '/.maintenance') ;
+        }else{
+            return realpath(self::MAINTENANCE_FILE) . "/.maintenance" . ($this->host ? "-$this->host" : '');
+        }
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getHost(): ?string
+    {
+        return $this->host;
+    }
+
+    /**
+     * @param string|null $host
+     * @return MaintenanceService
+     */
+    public function setHost(?string $host): MaintenanceService
+    {
+        $this->host = $host;
+        return $this;
     }
 }
