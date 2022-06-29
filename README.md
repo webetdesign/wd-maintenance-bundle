@@ -48,6 +48,14 @@ Exclude maintenance file
 # Used to store IP
 /var/.maintenance
 ```
+
+Security
+````yaml
+#config/packages/security.yaml
+access_control:
+  - { path: ^/maintenance/authorize/.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+````
+
 ## Enable maintenance mode
 If a client with a IP in the list try to access website during maintenance mode, he won't be blocked
 ````shell
