@@ -31,6 +31,7 @@ class MaintenanceModeCommand extends Command
             ->addOption('on', null, InputOption::VALUE_NONE, 'Make maintenance on')
             ->addOption('off', null, InputOption::VALUE_NONE, 'Make maintenance off')
             ->addArgument('ips', InputArgument::OPTIONAL, 'White list of ip address : "XX.XX.XX.XX, XX.XX.XX.XX"')
+            ->addArgument('host', InputArgument::OPTIONAL, 'Host of website to configure')
         ;
     }
 
@@ -38,15 +39,18 @@ class MaintenanceModeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $ipsArgs = $input->getArgument('ips');
+        $host = $input->getArgument('host');
 
         if ($ipsArgs) {
             $io->note(sprintf('The following ips will be added to the white list : %s', $ipsArgs));
         }
 
+        $sites = $host ? $this->cmsSiteRepository->findBy(['host' => $host]) : $this->cmsSiteRepository->findAll();
+
         if ($input->getOption('on')){
-            $this->maintenanceService->enableMaintenance($ipsArgs, $io, $this->cmsSiteRepository->findAll());
+            $this->maintenanceService->enableMaintenance($ipsArgs, $io, $sites);
         }else if ($input->getOption('off')){
-            $this->maintenanceService->disableMaintenance(false, $io, $this->cmsSiteRepository->findAll());
+            $this->maintenanceService->disableMaintenance(false, $io, $sites);
         }else{
             $io->error('You need to pass on or off option');
             return Command::INVALID;

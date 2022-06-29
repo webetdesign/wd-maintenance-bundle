@@ -13,3 +13,6 @@ services:
     arguments:
       - '%wd_maintenance.template%'
 
+  WebEtDesign\MaintenanceBundle\Controller\:
+    resource: '../../Controller/*'
+    tags: [ 'controller.service_arguments' ]

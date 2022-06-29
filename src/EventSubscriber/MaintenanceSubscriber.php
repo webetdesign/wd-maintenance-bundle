@@ -22,7 +22,9 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         
         if (!$this->maintenanceService->maintenanceIsEnable()) return;
 
-        if (in_array($event->getRequest()->getClientIp(), $this->maintenanceService->getIps())) return;
+        if ($this->maintenanceService->isAuthorized($event->getRequest())) return;
+
+        if ($event->getRequest()->attributes->get('_route') === 'maintenance_authorize') return;
 
         try {
             $event->setResponse(

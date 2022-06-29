@@ -1,0 +1,3 @@
+wd_maintenance.controller:
+  resource: '../../Controller/'
+  type: annotation
