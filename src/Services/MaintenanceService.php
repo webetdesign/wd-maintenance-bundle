@@ -20,7 +20,7 @@ class MaintenanceService
         $this->filesystem = new Filesystem();
     }
 
-    public function enableMaintenance(?string $ipsArgs = '', SymfonyStyle $io = null, array $sites = [])
+    public function enableMaintenance(?string $ipsArgs = '', ?SymfonyStyle $io = null, array $sites = [])
     {
         $this->disableMaintenance(true, $io, $sites);
 
@@ -35,7 +35,7 @@ class MaintenanceService
         $io?->success('Maintenance mode enabled');
     }
 
-    public function disableMaintenance(bool $check = false, SymfonyStyle $io = null, array $sites = [])
+    public function disableMaintenance(bool $check = false, ?SymfonyStyle $io = null, array $sites = [])
     {
         $this->filesystem = new Filesystem();
 
