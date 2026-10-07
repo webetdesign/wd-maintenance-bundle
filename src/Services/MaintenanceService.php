@@ -100,11 +100,31 @@ class MaintenanceService
 
     public function validWhiteLink(string $hash): bool
     {
-        return $hash === $_ENV['MAINTENANCE_BUNDLE_HASH'];
+        $expected = $this->getWhiteLinkHash();
+
+        return null !== $expected && hash_equals($expected, $hash);
     }
 
     public function generateWhiteLink(): string
     {
-        return $this->urlGenerator->generate('maintenance_authorize', ['hash' => $_ENV['MAINTENANCE_BUNDLE_HASH']], UrlGeneratorInterface::ABSOLUTE_URL);
+        $hash = $this->getWhiteLinkHash();
+
+        if (null === $hash) {
+            throw new \LogicException('The MAINTENANCE_BUNDLE_HASH environment variable is not set: the maintenance white link is disabled.');
+        }
+
+        return $this->urlGenerator->generate('maintenance_authorize', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
+    }
+
+    /**
+     * Returns null when MAINTENANCE_BUNDLE_HASH is missing or empty, which
+     * disables the white link. A real environment variable is only exposed in
+     * $_SERVER when variables_order does not include "E".
+     */
+    private function getWhiteLinkHash(): ?string
+    {
+        $hash = $_SERVER['MAINTENANCE_BUNDLE_HASH'] ?? $_ENV['MAINTENANCE_BUNDLE_HASH'] ?? null;
+
+        return \is_string($hash) && '' !== $hash ? $hash : null;
     }
 }

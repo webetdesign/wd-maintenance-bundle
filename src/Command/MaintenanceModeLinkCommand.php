@@ -28,7 +28,13 @@ class MaintenanceModeLinkCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $io->info('Link : ' . $this->maintenanceService->generateWhiteLink());
+        try {
+            $io->info('Link : ' . $this->maintenanceService->generateWhiteLink());
+        } catch (\LogicException $e) {
+            $io->error($e->getMessage());
+
+            return Command::FAILURE;
+        }
 
         return Command::SUCCESS;
     }

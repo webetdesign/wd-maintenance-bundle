@@ -3,8 +3,8 @@
 Bundle to temparary disable website. Work for multisite. 
 
 ## Requirement
-- PHP ^8.0
-- symfony ^5
+- PHP ^8.2
+- symfony ^7.4
 
 ## Installation
 Add the repo to your composer.json
@@ -53,7 +53,7 @@ Security
 ````yaml
 #config/packages/security.yaml
 access_control:
-  - { path: ^/maintenance/authorize/.*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+  - { path: ^/maintenance/authorize/.*, roles: PUBLIC_ACCESS }
 ````
 
 ## Enable maintenance mode
@@ -81,7 +81,9 @@ Configure white list hash
 MAINTENANCE_BUNDLE_HASH=my_hash
 ```
 You can send a link to somenone to give him access whitout adding is IP. Provide a value
-to MAINTENANCE_BUNDLE_HASH in the .env.local file.
+to MAINTENANCE_BUNDLE_HASH in the .env.local file or as a server environment variable,
+never in the committed .env file. When the variable is missing or empty, the white link
+is disabled.
 ````shell
 bin/console app:maintenance-mode-link
 ````
